@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="Settings">الإعدادات</string>
+    <string name="arabic">العربية</string>
+    <string name="english">الإنجليزية</string>
+    <string name="device_default">لغة الجهاز</string>
+    <string name="layout_preferences">اللغة</string>
+    <string name="celsius">درجة مئوية</string>
+    <string name="kelvin">كلفن</string>
+    <string name="fahrenheit">فهرنهايت</string>
+    <string name="temperature">وحدة درجة الحرارة</string>
+    <string name="celsius_mark">°C</string>
+    <string name="fahrenheit_mark">°F</string>
+    <string name="kelvin_mark">K</string>
+    <string name="gps">نظام تحديد المواقع</string>
+    <string name="maps">خرائط</string>
+    <string name="location">تحديد الموقع</string>
+    <string name="meter">متر/ثانية</string>
+    <string name="mile">ميل/ساعة</string>
+    <string name="wind_speed">سرعة الرياح</string>
+</resources>

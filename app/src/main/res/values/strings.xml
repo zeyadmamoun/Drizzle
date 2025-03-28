@@ -1,4 +1,22 @@
 <resources>
-    <string name="app_name">Drizzle</string>
-    <string name="title_activity_splash">SplashActivity</string>
+    <string name="app_name" translatable="false">Drizzle</string>
+    <string name="title_activity_splash" translatable="false">SplashActivity</string>
+    <string name="Settings">Settings</string>
+    <string name="arabic">Arabic</string>
+    <string name="english">English</string>
+    <string name="device_default">Default</string>
+    <string name="layout_preferences">Layout Preferences</string>
+    <string name="celsius">"Celsius"</string>
+    <string name="kelvin">Kelvin</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="temperature">Temperature</string>
+    <string name="celsius_mark">°C</string>
+    <string name="fahrenheit_mark">°F</string>
+    <string name="kelvin_mark">K</string>
+    <string name="gps">GPS</string>
+    <string name="maps">Maps</string>
+    <string name="location">Location</string>
+    <string name="meter">meter/sec</string>
+    <string name="mile">mile/hour</string>
+    <string name="wind_speed">Wind Speed</string>
 </resources>

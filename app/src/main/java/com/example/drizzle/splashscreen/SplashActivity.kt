@@ -80,6 +80,7 @@ fun AnimationBlock() {
             LaunchedEffect(Unit) {
                 delay(2000)
                 navigateToMainActivity(context)
+                activity.finish()
             }
         }
     } else {

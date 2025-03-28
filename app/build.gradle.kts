@@ -3,11 +3,16 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.1.20"
+    id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.example.drizzle"
     compileSdk = 35
+
+    androidResources {
+        generateLocaleConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.example.drizzle"
@@ -44,15 +49,29 @@ dependencies {
 
     // Navigation Component
     implementation(libs.androidx.navigation.compose)
+    //Kotlinx DateTime
+    implementation(libs.kotlinx.datetime)
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
     // Lottie Animation for splash screen
     implementation(libs.lottie.compose)
     // Compose Accompanist permission
     implementation (libs.accompanist.permissions)
+    // ViewModel with Compose
+    implementation(libs.androidx.lifecycle.lifecycle.viewmodel.compose)
+    // Koin
+    implementation (libs.koin.androidx.compose)
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    // Preferences DataStore
+    implementation(libs.androidx.datastore.preferences)
+
 
 
     implementation(libs.androidx.core.ktx)
