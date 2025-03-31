@@ -33,6 +33,10 @@
             android:exported="true"
             android:theme="@style/Theme.Drizzle">
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBcd6Ny1depeXdWnNk2Tpl7V4ZXhWs_VzQ"/>
     </application>
 
 </manifest>

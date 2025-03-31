@@ -3,10 +3,13 @@ package com.example.drizzle.repository
 import com.example.drizzle.data.LocalDataSource
 import com.example.drizzle.model.current.WeatherDTO
 import com.example.drizzle.network.RemoteDataSource
+import com.example.drizzle.screens.home.HourForecast
 import com.example.drizzle.ui.theme.iconsMap
+import kotlinx.coroutines.flow.Flow
 
 class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : WeatherRepository {
 
+    // gets The current Weather conditions from the server
     override suspend fun getCurrentWeather(
         isOnline: Boolean,
         lat: Double,
@@ -15,7 +18,8 @@ class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : Weat
         return RemoteDataSource.getCurrentWeather(lat, lon).toWeatherObject()
     }
 
-    override suspend fun getHourlyWeather(lat: Double, lon: Double): List<WeatherDTO> {
+    // get the forecast for the next 5 days every three hours from server
+    override suspend fun getHourlyForecast(lat: Double, lon: Double): List<WeatherDTO> {
         val result = RemoteDataSource.getHourlyWeather(lat,lon)
         return result.list.map { item ->
             WeatherDTO(
@@ -33,5 +37,17 @@ class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : Weat
                 icon = iconsMap[item.weather[0].icon]!!
             )
         }.toList()
+    }
+
+    override fun getLocalCurrentWeather(): Flow<List<WeatherDTO>> {
+        return localDataSource.getAllCurrent()
+    }
+
+    override suspend fun deleteLocalCurrentWeather() {
+        localDataSource.deleteAllCurrent()
+    }
+
+    override suspend fun insertLocalCurrentEntry(hourForecast: WeatherDTO) {
+        localDataSource.insertHourForecast(hourForecast)
     }
 }

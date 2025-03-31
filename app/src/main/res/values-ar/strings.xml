@@ -11,11 +11,16 @@
     <string name="temperature">وحدة درجة الحرارة</string>
     <string name="celsius_mark">°C</string>
     <string name="fahrenheit_mark">°F</string>
-    <string name="kelvin_mark">K</string>
+    <string name="kelvin_mark">°K</string>
     <string name="gps">نظام تحديد المواقع</string>
     <string name="maps">خرائط</string>
     <string name="location">تحديد الموقع</string>
     <string name="meter">متر/ثانية</string>
     <string name="mile">ميل/ساعة</string>
     <string name="wind_speed">سرعة الرياح</string>
+    <string name="map">الخريطة</string>
+    <string name="location_not_selected">لم يتم تحديد الموقع بعد</string>
+    <string name="choose_location">اختر الموقع</string>
+    <string name="default_location">الموقع الأساسي</string>
+    <string name="current_Location">الموقع الحالي</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.example.drizzle.screens.home
 
-import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,12 +20,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +48,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.drizzle.R
-import com.example.drizzle.ui.theme.DrizzleTheme
+import com.example.drizzle.ui.theme.coldGradient
 import com.example.drizzle.ui.theme.coolGradient
+import com.example.drizzle.ui.theme.hotGradient
 import com.example.drizzle.ui.theme.hourSection
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     paddingValues: PaddingValues = PaddingValues(),
@@ -52,116 +65,172 @@ fun HomeScreen(
     val currentWeather by viewModel.currentWeather.collectAsState()
     val hourlyForecast by viewModel.hourlyWeather.collectAsState()
     val weeklyForecast by viewModel.weeklyWeather.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val state = rememberPullToRefreshState()
+    var isRefreshing by remember { mutableStateOf(false) }
 
-    LazyColumn(
-        modifier = Modifier
-            .padding(bottom = paddingValues.calculateBottomPadding())
-            .fillMaxSize(),
+    LaunchedEffect(Unit) {
+        viewModel.resetData()
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isLoading,
+        onRefresh = {
+            coroutineScope.launch {
+                viewModel.resetData()
+                delay(2000)
+                state.animateToHidden()
+            }
+        },
+        state = state,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                containerColor = hourSection,
+                color = MaterialTheme.colorScheme.primary,
+                state = state
+            )
+        },
     ) {
-        item { TemperatureSection(currentWeather) }
-        item { Spacer(Modifier.height(8.dp)) }
-        item { HourlyTemperatureSection(hourlyForecast) }
-        item { Spacer(Modifier.height(8.dp)) }
-        item { WeekTemperatureSection(weeklyForecast) }
+        LazyColumn(
+            modifier = Modifier
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .fillMaxSize(),
+        ) {
+            item { TemperatureSection(currentWeather, isLoading, error)  }
+            item { Spacer(Modifier.height(8.dp)) }
+            item { HourlyTemperatureSection(hourlyForecast) }
+            item { Spacer(Modifier.height(8.dp)) }
+            item { WeekTemperatureSection(weeklyForecast) }
+        }
     }
 }
 
+
 @Composable
 fun TemperatureSection(
-    state: CurrentWeatherUiState
+    state: CurrentWeatherUiState?, isLoading: Boolean, error: String
 ) {
     Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .height(500.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
             .background(
                 brush = Brush.linearGradient(
-                    colors = coolGradient, // Gradient colors
-                    start = Offset(0f, 0f), // Start from top-left
+                    colors = when {
+                        state == null-> coolGradient
+                        state.temperature.toInt() > 30 -> hotGradient
+                        state.temperature.toInt() < 10 -> coldGradient
+                        else -> coolGradient
+                    }, start = Offset(0f, 0f), // Start from top-left
                     end = Offset(1000f, 1000f) // End at bottom-right
                 )
             )
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 32.dp)
-        ) {
-            Text(
-                "${state.dayOfWeek}, ${state.day} ${state.month}",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = Color.White.copy(alpha = 0.7f)
-                ),
-            )
-            Text(
-                "${state.city}, ${state.country}",
-                color = Color.White,
-                style = MaterialTheme.typography.titleLarge
-            )
-            Image(
-                painter = painterResource(state.icon),
-                contentDescription = null,
-                modifier = Modifier.size(150.dp)
-            )
-
-            Row {
-                Text(
-                    state.temperature,
-                    color = Color.White,
-                    style = MaterialTheme.typography.displayLarge
-                )
-                Text(
-                    stringResource(R.string.celsius_mark),
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleSmall
-                        .copy(fontSize = 10.sp)
-                )
+        if (!isLoading) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 32.dp)
+            ) {
+                if (error.isEmpty()){
+                    TemperatureSectionContent(state)
+                } else {
+                    Text(error, style = MaterialTheme.typography.titleLarge)
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row {
-                Icon(
-                    painter = painterResource(R.drawable.humidty),
-                    tint = Color.White,
-                    contentDescription = "Settings"
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    state.humidity,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White
-                    ),
-                )
-                Spacer(modifier = Modifier.width(32.dp))
-                Icon(
-                    painter = painterResource(R.drawable.wind),
-                    tint = Color.White,
-                    contentDescription = "Settings"
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    state.windSpeed,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White
-                    ),
-                )
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 32.dp)
+            ) {
+                CircularProgressIndicator(color = Color.White)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                state.weatherDesc,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = Color.White.copy(alpha = 0.7f)
-                ),
-            )
         }
-
     }
+}
+
+@Composable
+fun TemperatureSectionContent(state: CurrentWeatherUiState?) {
+    if (state == null ){
+        return
+    }
+    Text(
+        "${state.dayOfWeek}, ${state.day} ${state.month}",
+        style = MaterialTheme.typography.bodyLarge.copy(
+            color = Color.White.copy(alpha = 0.7f)
+        ),
+    )
+    Text(
+        "${state.city}, ${state.country}",
+        color = Color.White,
+        style = MaterialTheme.typography.titleLarge
+    )
+    Image(
+        painter = painterResource(state.icon),
+        contentDescription = null,
+        modifier = Modifier.size(150.dp)
+    )
+
+    Row {
+        Text(
+            state.temperature, color = Color.White, style = MaterialTheme.typography.displayLarge
+        )
+        Text(
+            stringResource(state.tempUnit),
+            color = Color.White,
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Row {
+        Icon(
+            painter = painterResource(R.drawable.humidty),
+            tint = Color.White,
+            contentDescription = "Settings"
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            state.humidity,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = Color.White
+            ),
+        )
+        Spacer(modifier = Modifier.width(32.dp))
+        Icon(
+            painter = painterResource(R.drawable.wind),
+            tint = Color.White,
+            contentDescription = "Settings"
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            state.windSpeed,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = Color.White
+            ),
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        state.weatherDesc,
+        style = MaterialTheme.typography.bodyLarge.copy(
+            color = Color.White.copy(alpha = 0.7f)
+        ),
+    )
 }
 
 @Composable
@@ -180,8 +249,7 @@ fun HourlyTemperatureSection(hourlyForecast: List<HourForecast>) {
             Text(
                 "hourly forecast",
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.5f)
+                    fontSize = 14.sp, color = Color.White.copy(alpha = 0.5f)
                 ),
             )
             Spacer(Modifier.height(16.dp))
@@ -209,8 +277,7 @@ fun WeekTemperatureSection(weeklyForecast: List<DayWeatherRow>) {
             Text(
                 "Weekly forecast",
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.5f)
+                    fontSize = 14.sp, color = Color.White.copy(alpha = 0.5f)
                 ),
             )
             Spacer(Modifier.height(16.dp))
@@ -238,15 +305,22 @@ fun HourTempColumn(hourForecast: HourForecast) {
             modifier = Modifier.size(40.dp),
             contentDescription = null
         )
-        Text(
-            hourForecast.temperature,
-            style = MaterialTheme.typography.bodyLarge
-                .copy(color = Color.White)
-        )
+        Row {
+            Text(
+                hourForecast.temperature,
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+            )
+            Text(
+                stringResource(hourForecast.tempUnit),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                        color = Color.White,
+                        fontSize = 8.sp
+                    )
+            )
+        }
         Text(
             "${hourForecast.hour}:00",
-            style = MaterialTheme.typography.bodyLarge
-                .copy(color = Color.White)
+            style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
         )
     }
 }
@@ -258,24 +332,19 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(
-                start = 8.dp,
-                end = 16.dp,
-                top = 8.dp,
-                bottom = 8.dp
+                start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp
             )
             .fillMaxWidth()
     ) {
         Row {
             Column {
                 Text(
-                    dayForecast.dayOfWeek,
-                    style = MaterialTheme.typography.bodyLarge
+                    dayForecast.dayOfWeek, style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     "${dayForecast.dayOfMonth} ${dayForecast.month}",
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.5f)
+                        fontSize = 12.sp, color = Color.White.copy(alpha = 0.5f)
                     ),
                 )
             }
@@ -285,34 +354,42 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
             modifier = Modifier.size(40.dp),
             contentDescription = null
         )
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
-                "${dayForecast.temperature} / ",
-                style = MaterialTheme.typography.bodyLarge
+                dayForecast.temperature, style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                stringResource(dayForecast.tempUnit) + "/",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                        color = Color.White,
+                        fontSize = 8.sp
+                    )
             )
             Text(
                 " feels like ${dayForecast.feelsLike}",
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.5f)
+                    fontSize = 14.sp, color = Color.White.copy(alpha = 0.5f)
                 ),
+            )
+            Text(
+                stringResource(dayForecast.tempUnit),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                        color = Color.White,
+                        fontSize = 8.sp
+                    )
             )
         }
     }
 }
 
 @Preview(
-    showBackground = true,
     showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 private fun HomeScreenPreview() {
-    DrizzleTheme(
-        darkTheme = true
-    ) { HomeScreen() }
+    HomeScreen()
 }
 
 //@Preview(showBackground = true)
@@ -331,7 +408,8 @@ private fun DayTempRowPreview() {
             month = "MARCH",
             feelsLike = "18",
             icon = R.drawable.d02,
-            temperature = "20"
+            temperature = "20",
+            tempUnit = R.string.celsius_mark
         )
     )
 }

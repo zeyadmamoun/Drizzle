@@ -3,8 +3,8 @@ package com.example.drizzle.model.current
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "current")
-data class WeatherDTO(
+@Entity(tableName = "favorites")
+data class FavoriteWeatherDTO(
     @PrimaryKey(autoGenerate = true) val entryId: Int = 0,
     val icon: Int,
     val weatherLat: Double,

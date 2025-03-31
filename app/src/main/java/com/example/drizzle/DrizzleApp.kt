@@ -21,9 +21,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.drizzle.screens.home.HomeScreen
+import com.example.drizzle.screens.map.MapScreen
 import com.example.drizzle.screens.settings.SettingsScreen
 import com.example.drizzle.ui.theme.CustomSnackBar
 import com.example.drizzle.ui.theme.DrizzleHomeTopAppBar
+import com.example.drizzle.ui.theme.DrizzleMapTopAppBar
 import com.example.drizzle.ui.theme.DrizzleSettingsTopAppBar
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import kotlinx.coroutines.flow.collectLatest
@@ -52,6 +54,7 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
                     scrollBehavior
                 ) { navController.navigate(Settings) }
                 "com.example.drizzle.Settings" -> DrizzleSettingsTopAppBar { navController.navigateUp() }
+                "com.example.drizzle.Map" -> DrizzleMapTopAppBar { navController.navigateUp() }
             }
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -78,7 +81,14 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
             }
 
             composable<Settings> {
-                SettingsScreen(paddingValues = innerPadding)
+                SettingsScreen(paddingValues = innerPadding, navigateToMap = {navController.navigate(Map)})
+            }
+
+            composable<Map> {
+                MapScreen(
+                    paddingValues = innerPadding,
+                    navigateBack = { navController.navigateUp() }
+                )
             }
         }
     }
@@ -102,4 +112,7 @@ object Favorites
 
 @Serializable
 object WeatherAlert
+
+@Serializable
+object Map
 

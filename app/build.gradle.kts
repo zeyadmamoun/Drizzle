@@ -67,10 +67,13 @@ dependencies {
     implementation (libs.koin.androidx.compose)
     // Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.play.services.maps)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     // Preferences DataStore
     implementation(libs.androidx.datastore.preferences)
+    // Android Maps Compose composables for the Maps SDK for Android
+    implementation(libs.maps.compose)
 
 
 

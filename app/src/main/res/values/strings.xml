@@ -12,11 +12,16 @@
     <string name="temperature">Temperature</string>
     <string name="celsius_mark">°C</string>
     <string name="fahrenheit_mark">°F</string>
-    <string name="kelvin_mark">K</string>
+    <string name="kelvin_mark">°K</string>
     <string name="gps">GPS</string>
     <string name="maps">Maps</string>
     <string name="location">Location</string>
     <string name="meter">meter/sec</string>
     <string name="mile">mile/hour</string>
     <string name="wind_speed">Wind Speed</string>
+    <string name="map">Map</string>
+    <string name="location_not_selected">Location not selected yet</string>
+    <string name="choose_location">Choose Location</string>
+    <string name="default_location">Default location</string>
+    <string name="current_Location">current_location</string>
 </resources>
