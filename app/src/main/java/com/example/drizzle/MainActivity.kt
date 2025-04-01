@@ -16,15 +16,16 @@ import com.example.drizzle.ui.theme.DrizzleTheme
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import com.example.drizzle.utils.locale.updateAppLocale
 import org.koin.android.ext.android.inject
+import org.koin.compose.koinInject
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
-    private lateinit var connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver by inject()
     private val settingsPreferencesRepository: SettingsPreferencesRepository by inject()
+
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        connectivityObserver = ConnectivityObserver(this)
         enableEdgeToEdge()
         setContent {
 
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    DrizzleApp()
+                    DrizzleApp(connectivityObserver)
                 }
             }
         }

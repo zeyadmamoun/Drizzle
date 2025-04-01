@@ -17,6 +17,6 @@ interface WeatherDao {
     @Query("DELETE FROM current")
     suspend fun deleteAllCurrent()
 
-    @Query("SELECT * FROM current")
+    @Query("SELECT * FROM current order by date ASC")
     fun getCurrentForecast(): Flow<List<WeatherDTO>>
 }

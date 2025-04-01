@@ -1,6 +1,5 @@
 package com.example.drizzle
 
-import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -9,9 +8,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,15 +28,14 @@ import com.example.drizzle.ui.theme.DrizzleMapTopAppBar
 import com.example.drizzle.ui.theme.DrizzleSettingsTopAppBar
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.serialization.Serializable
+import org.koin.compose.koinInject
 
-@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
+fun DrizzleApp(connectivityObserver: ConnectivityObserver) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
     val currentDestination by navController.currentBackStackEntryAsState()
@@ -53,15 +51,17 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
                 "com.example.drizzle.Home" -> DrizzleHomeTopAppBar(
                     scrollBehavior
                 ) { navController.navigate(Settings) }
+
                 "com.example.drizzle.Settings" -> DrizzleSettingsTopAppBar { navController.navigateUp() }
                 "com.example.drizzle.Map" -> DrizzleMapTopAppBar { navController.navigateUp() }
             }
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
-        scope.launch {
-            connectivityObserver?.let {
-                it.isConnected.asFlow().collectLatest { state ->
+
+        LaunchedEffect(Unit) {
+            connectivityObserver.isConnected.asFlow().distinctUntilChanged()
+                .collectLatest { state ->
                     if (!state) {
                         snackBarHostState.showSnackbar(
                             message = "No Internet Connection",
@@ -69,7 +69,6 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
                         )
                     }
                 }
-            }
         }
 
         NavHost(
@@ -81,7 +80,9 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
             }
 
             composable<Settings> {
-                SettingsScreen(paddingValues = innerPadding, navigateToMap = {navController.navigate(Map)})
+                SettingsScreen(
+                    paddingValues = innerPadding,
+                    navigateToMap = { navController.navigate(Map) })
             }
 
             composable<Map> {
@@ -97,7 +98,8 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver? = null) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun DrizzleAppPreview() {
-    DrizzleApp()
+    val connectivityObserver = koinInject<ConnectivityObserver>()
+    DrizzleApp(connectivityObserver)
 }
 
 // Routes

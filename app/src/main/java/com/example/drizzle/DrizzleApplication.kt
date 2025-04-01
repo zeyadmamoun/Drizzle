@@ -10,12 +10,13 @@ import com.example.drizzle.data.LocalDataSourceImpl
 import com.example.drizzle.data.WeatherDao
 import com.example.drizzle.data.WeatherDatabase
 import com.example.drizzle.repository.SettingsPreferencesRepository
-import com.example.drizzle.screens.home.HomeViewModel
 import com.example.drizzle.repository.WeatherRepository
 import com.example.drizzle.repository.WeatherRepositoryImpl
+import com.example.drizzle.screens.home.HomeViewModel
 import com.example.drizzle.screens.map.MapViewModel
 import com.example.drizzle.screens.settings.SettingsViewModel
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
+import com.example.drizzle.utils.location.LocationHelper
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -35,13 +36,14 @@ class DrizzleApplication : Application() {
         val appModule = module {
 
             single { ConnectivityObserver(get()) }
-            single<WeatherDao>{ WeatherDatabase.getDatabase(get()).weatherDao() }
+            single { LocationHelper(get()) }
+            single<WeatherDao> { WeatherDatabase.getDatabase(get()).weatherDao() }
 
             single<LocalDataSource> {
                 LocalDataSourceImpl(get())
             }
 
-            single<SettingsPreferencesRepository>{
+            single<SettingsPreferencesRepository> {
                 SettingsPreferencesRepository(dataStore = dataStore)
             }
 
@@ -49,7 +51,7 @@ class DrizzleApplication : Application() {
                 WeatherRepositoryImpl(get())
             }
 
-            viewModel { HomeViewModel(get(),get(),get()) }
+            viewModel { HomeViewModel(get(), get(), get(),get()) }
             viewModel { SettingsViewModel(get()) }
             viewModel { MapViewModel(get()) }
         }

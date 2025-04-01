@@ -32,10 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,11 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.drizzle.R
-import com.example.drizzle.ui.theme.coldGradient
 import com.example.drizzle.ui.theme.coolGradient
-import com.example.drizzle.ui.theme.hotGradient
 import com.example.drizzle.ui.theme.hourSection
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -69,18 +63,17 @@ fun HomeScreen(
     val error by viewModel.error.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
-    var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.resetData()
+        viewModel.collectLocalDate()
+        viewModel.refreshData()
     }
 
     PullToRefreshBox(
         isRefreshing = isLoading,
         onRefresh = {
             coroutineScope.launch {
-                viewModel.resetData()
-                delay(2000)
+                viewModel.refreshData()
                 state.animateToHidden()
             }
         },
@@ -88,7 +81,7 @@ fun HomeScreen(
         indicator = {
             Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = isRefreshing,
+                isRefreshing = isLoading,
                 containerColor = hourSection,
                 color = MaterialTheme.colorScheme.primary,
                 state = state
@@ -112,7 +105,9 @@ fun HomeScreen(
 
 @Composable
 fun TemperatureSection(
-    state: CurrentWeatherUiState?, isLoading: Boolean, error: String
+    state: CurrentWeatherUiState?,
+    isLoading: Boolean,
+    error: String
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -122,12 +117,8 @@ fun TemperatureSection(
             .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
             .background(
                 brush = Brush.linearGradient(
-                    colors = when {
-                        state == null-> coolGradient
-                        state.temperature.toInt() > 30 -> hotGradient
-                        state.temperature.toInt() < 10 -> coldGradient
-                        else -> coolGradient
-                    }, start = Offset(0f, 0f), // Start from top-left
+                    colors = state?.background ?: coolGradient,
+                    start = Offset(0f, 0f), // Start from top-left
                     end = Offset(1000f, 1000f) // End at bottom-right
                 )
             )
@@ -140,11 +131,10 @@ fun TemperatureSection(
                     .fillMaxSize()
                     .padding(bottom = 32.dp)
             ) {
-                if (error.isEmpty()){
+                if (error.isEmpty())
                     TemperatureSectionContent(state)
-                } else {
-                    Text(error, style = MaterialTheme.typography.titleLarge)
-                }
+                else
+                    Text(error, style = MaterialTheme.typography.titleSmall)
             }
         } else {
             Column(
@@ -284,7 +274,7 @@ fun WeekTemperatureSection(weeklyForecast: List<DayWeatherRow>) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(340.dp)
             ) {
                 items(weeklyForecast) {
                     DayTempRow(it)
@@ -391,12 +381,6 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
 private fun HomeScreenPreview() {
     HomeScreen()
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//private fun HourTempColumnPreview() {
-//    HourTempColumn(listOfHourForecast[0])
-//}
 
 @Preview(showBackground = true)
 @Composable
