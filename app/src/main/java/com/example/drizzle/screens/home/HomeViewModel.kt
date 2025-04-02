@@ -18,9 +18,9 @@ import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import com.example.drizzle.utils.location.LocationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -61,21 +61,23 @@ class HomeViewModel(
         MutableStateFlow(emptyList())
     val weeklyWeather: StateFlow<List<DayWeatherRow>> = _weeklyWeather
 
-    private var _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private var _error: MutableStateFlow<String> = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
     init {
+        loadUserSettings()
         collectLocalDate()
     }
 
     // in the init we only make the collection from database
-    fun collectLocalDate() {
-        viewModelScope.launch {
-            repository.getLocalCurrentWeather().collectLatest { list ->
-                Log.i(TAG, "im inside the collection : ")
+    private fun collectLocalDate() {
+        viewModelScope.launch(Dispatchers.IO) {
+            delay(100)
+            repository.getLocalCurrentWeather().collect { list ->
+                Log.i("HomeViewModel", "im inside the room data collection : ")
                 val currentTime = Clock.System.now().epochSeconds.toInt()
 
                 // checking if any cached time equals current time
@@ -98,23 +100,41 @@ class HomeViewModel(
         }
     }
 
+    private fun loadUserSettings() {
+        viewModelScope.launch(Dispatchers.Default) {
+            settingsRepository.temperatureSettings.collect {
+                temperatureUnit = it
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.Default) {
+            settingsRepository.windSpeedSettings.collect {
+                windSpeedUnit = it
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.Default) {
+            settingsRepository.locationSettings.collect {
+                locationSetting = it
+                Log.i(TAG, "loadUserSettings: location setting collected -> $locationSetting")
+            }
+        }
+    }
+
     fun refreshData() {
         viewModelScope.launch(Dispatchers.IO) {
-            // collect the preferences
-            temperatureUnit = settingsRepository.temperatureSettings.first()
-            windSpeedUnit = settingsRepository.windSpeedSettings.first()
-            locationSetting = settingsRepository.locationSettings.first()
-
             // refresh cached data if there is internet connection
             val isConnected = connectivityObserver.isConnected.asFlow().first()
             if (isConnected) {
                 _isLoading.value = true
                 // 1 - here we check on the user selected source of location and get data upon it as Pair()
                 val coordinates = async {
+                    Log.i(TAG, "refreshData: about to hit location setting")
                     when (locationSetting) {
                         LocationSettings.MAPS.name -> {
                             settingsRepository.currentCoordinates.first()
                         }
+
                         else -> {
                             locationHelper.getLocation().first()
                         }
@@ -153,9 +173,8 @@ class HomeViewModel(
                 } catch (ex: HttpException) {
                     Log.i(TAG, ex.toString())
                     _error.value = "refresh the screen again"
-                } catch (ex: SocketTimeoutException){
+                } catch (ex: SocketTimeoutException) {
                     Log.i(TAG, ex.toString())
-                    refreshData()
                     _error.value = "refresh the screen again"
                 }
             }
@@ -256,7 +275,7 @@ class HomeViewModel(
     }
 
     //responsible for updating the main temperature section by calling the api
-    // and update _currentWeather StateFlow
+// and update _currentWeather StateFlow
     private fun updateCurrentWeatherState(weatherDTO: WeatherDTO) {
         val date = getLocalDateTime(weatherDTO.date.toLong())
         _currentWeather.update {

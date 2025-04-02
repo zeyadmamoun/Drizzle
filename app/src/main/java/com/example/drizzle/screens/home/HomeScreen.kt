@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +65,6 @@ fun HomeScreen(
     val state = rememberPullToRefreshState()
 
     LaunchedEffect(Unit) {
-        viewModel.collectLocalDate()
         viewModel.refreshData()
     }
 
@@ -80,7 +79,8 @@ fun HomeScreen(
         state = state,
         indicator = {
             Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier.align(Alignment.TopCenter)
+                    .offset(y = 32.dp),
                 isRefreshing = isLoading,
                 containerColor = hourSection,
                 color = MaterialTheme.colorScheme.primary,
@@ -93,7 +93,7 @@ fun HomeScreen(
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .fillMaxSize(),
         ) {
-            item { TemperatureSection(currentWeather, isLoading, error)  }
+            item { TemperatureSection(currentWeather, error)  }
             item { Spacer(Modifier.height(8.dp)) }
             item { HourlyTemperatureSection(hourlyForecast) }
             item { Spacer(Modifier.height(8.dp)) }
@@ -106,7 +106,6 @@ fun HomeScreen(
 @Composable
 fun TemperatureSection(
     state: CurrentWeatherUiState?,
-    isLoading: Boolean,
     error: String
 ) {
     Box(
@@ -123,29 +122,18 @@ fun TemperatureSection(
                 )
             )
     ) {
-        if (!isLoading) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 32.dp)
-            ) {
-                if (error.isEmpty())
-                    TemperatureSectionContent(state)
-                else
-                    Text(error, style = MaterialTheme.typography.titleSmall)
-            }
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 32.dp)
-            ) {
-                CircularProgressIndicator(color = Color.White)
-            }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 32.dp)
+        ) {
+            if (error.isEmpty())
+                TemperatureSectionContent(state)
+            else
+                Text(error, style = MaterialTheme.typography.titleSmall)
         }
     }
 }

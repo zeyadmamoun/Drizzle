@@ -42,7 +42,7 @@ class SettingsPreferencesRepository(
     val locationSettings: Flow<String> = dataStore.data
         .catch {
             if (it is IOException) {
-                Log.e(TAG, "Error reading location setting.", it)
+                Log.e("HomeViewModel", "Error reading location setting.", it)
                 emit(emptyPreferences())
             }
         }
