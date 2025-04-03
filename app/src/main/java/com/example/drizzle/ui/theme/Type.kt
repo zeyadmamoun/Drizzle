@@ -32,6 +32,13 @@ val Typography = Typography(
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
+    displayMedium = TextStyle(
+        fontFamily = PlusJakartaSans,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 26.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
     titleSmall = TextStyle(
         fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.SemiBold,

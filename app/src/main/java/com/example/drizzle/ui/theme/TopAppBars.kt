@@ -2,8 +2,8 @@ package com.example.drizzle.ui.theme
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +22,9 @@ import com.example.drizzle.R
 @Composable
 fun DrizzleHomeTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onSettingsIconClicked: () -> Unit
+    onSettingsIconClicked: () -> Unit,
+    onFavoriteIconClicked: () -> Unit,
+    onAlertIconClicked: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         scrollBehavior = scrollBehavior,
@@ -30,9 +32,9 @@ fun DrizzleHomeTopAppBar(
             Text("Drizzle", style = MaterialTheme.typography.titleLarge)
         },
         navigationIcon = {
-            IconButton(onClick = { /* do something */ }) {
+            IconButton(onClick = { onAlertIconClicked() }) {
                 Icon(
-                    imageVector = Icons.Filled.DateRange,
+                    imageVector = Icons.Filled.Notifications,
                     tint = Color.White,
                     contentDescription = "Settings"
                 )
@@ -44,7 +46,7 @@ fun DrizzleHomeTopAppBar(
             titleContentColor = Color.White
         ),
         actions = {
-            IconButton(onClick = { /* do something */ }) {
+            IconButton(onClick = { onFavoriteIconClicked() }) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     tint = Color.White,
@@ -89,10 +91,10 @@ fun DrizzleSettingsTopAppBar(navigateUp: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrizzleMapTopAppBar(navigateUp: () -> Unit) {
+fun DrizzleMapTopAppBar(title: Int, navigateUp: () -> Unit) {
     CenterAlignedTopAppBar(
         title = {
-            Text(stringResource(R.string.default_location), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(title), style = MaterialTheme.typography.titleLarge)
         },
         navigationIcon = {
             IconButton(onClick = { navigateUp() }) {
@@ -105,6 +107,81 @@ fun DrizzleMapTopAppBar(navigateUp: () -> Unit) {
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = hourSection,
+            scrolledContainerColor = coolWeatherEnd,
+            titleContentColor = Color.White
+        ),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DrizzleFavoritesTopAppBar(navigateUp: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(stringResource(R.string.favorites), style = MaterialTheme.typography.titleLarge)
+        },
+        navigationIcon = {
+            IconButton(onClick = { navigateUp() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = Color.White,
+                    contentDescription = "back button to home"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = hourSection,
+            titleContentColor = Color.White
+        ),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DrizzleWeatherAlertTopAppBar(navigateUp: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(stringResource(R.string.alerts), style = MaterialTheme.typography.titleLarge)
+        },
+        navigationIcon = {
+            IconButton(onClick = { navigateUp() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = Color.White,
+                    contentDescription = "back button to home"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = hourSection,
+            titleContentColor = Color.White
+        ),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DrizzleFavoriteDetailsTopAppBar(
+    scrollBehavior: TopAppBarScrollBehavior, navigateUp: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        scrollBehavior = scrollBehavior,
+        title = {
+            Text(stringResource(R.string.favorites), style = MaterialTheme.typography.titleLarge)
+        },
+        navigationIcon = {
+            IconButton(onClick = { navigateUp() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = Color.White,
+                    contentDescription = "back button to home"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
             scrolledContainerColor = coolWeatherEnd,
             titleContentColor = Color.White
         ),

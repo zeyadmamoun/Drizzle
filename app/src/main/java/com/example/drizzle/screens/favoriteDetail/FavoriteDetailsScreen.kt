@@ -1,4 +1,4 @@
-package com.example.drizzle.screens.home
+package com.example.drizzle.screens.favoriteDetail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,6 +45,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.drizzle.R
+import com.example.drizzle.screens.home.CurrentWeatherUiState
+import com.example.drizzle.screens.home.DayWeatherRow
+import com.example.drizzle.screens.home.HourForecast
 import com.example.drizzle.ui.theme.coolGradient
 import com.example.drizzle.ui.theme.hourSection
 import kotlinx.coroutines.launch
@@ -52,9 +55,12 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun FavoriteDetailsScreen(
+    latitude: Double,
+    longitude: Double,
+    cityId: Int? = null,
+    viewModel: FavoriteDetailsViewModel = koinViewModel(),
     paddingValues: PaddingValues = PaddingValues(),
-    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val currentWeather by viewModel.currentWeather.collectAsState()
     val hourlyForecast by viewModel.hourlyWeather.collectAsState()
@@ -65,15 +71,15 @@ fun HomeScreen(
     val state = rememberPullToRefreshState()
 
     LaunchedEffect(Unit) {
-        viewModel.refreshData()
-        viewModel.collectLocalDate()
+        viewModel.refreshData(latitude, longitude)
+        viewModel.collectLocalDate(cityId)
     }
 
     PullToRefreshBox(
         isRefreshing = isLoading,
         onRefresh = {
             coroutineScope.launch {
-                viewModel.refreshData()
+                viewModel.refreshData(latitude, longitude)
                 state.animateToHidden()
             }
         },
@@ -95,7 +101,7 @@ fun HomeScreen(
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .fillMaxSize(),
         ) {
-            item { TemperatureSection(currentWeather, error)  }
+            item { TemperatureSection(currentWeather, error) }
             item { Spacer(Modifier.height(8.dp)) }
             item { HourlyTemperatureSection(hourlyForecast) }
             item { Spacer(Modifier.height(8.dp)) }
@@ -142,7 +148,7 @@ fun TemperatureSection(
 
 @Composable
 fun TemperatureSectionContent(state: CurrentWeatherUiState?) {
-    if (state == null ){
+    if (state == null) {
         return
     }
     Text(
@@ -293,9 +299,9 @@ fun HourTempColumn(hourForecast: HourForecast) {
             Text(
                 stringResource(hourForecast.tempUnit),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White,
-                        fontSize = 8.sp
-                    )
+                    color = Color.White,
+                    fontSize = 8.sp
+                )
             )
         }
         Text(
@@ -343,9 +349,9 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
             Text(
                 stringResource(dayForecast.tempUnit) + "/",
                 style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White,
-                        fontSize = 8.sp
-                    )
+                    color = Color.White,
+                    fontSize = 8.sp
+                )
             )
             Text(
                 " feels like ${dayForecast.feelsLike}",
@@ -356,9 +362,9 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
             Text(
                 stringResource(dayForecast.tempUnit),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White,
-                        fontSize = 8.sp
-                    )
+                    color = Color.White,
+                    fontSize = 8.sp
+                )
             )
         }
     }
@@ -369,7 +375,7 @@ fun DayTempRow(dayForecast: DayWeatherRow) {
 )
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen()
+    FavoriteDetailsScreen(30.2556, 31.06562145)
 }
 
 @Preview(showBackground = true)

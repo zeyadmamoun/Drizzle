@@ -24,4 +24,11 @@
     <string name="choose_location">Choose Location</string>
     <string name="default_location">Default location</string>
     <string name="current_Location">current_location</string>
+    <string name="favorites">Favorites</string>
+    <string name="no_fav_yet">No favorites added yet</string>
+    <string name="add_favorite">Add Favorite</string>
+    <string name="remove_city">Remove City</string>
+    <string name="alerts">Alerts</string>
+    <string name="add_alert">Add Alert</string>
+    <string name="no_alart_yet">No alerts added yet</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.drizzle.screens.home
+package com.example.drizzle.screens.favoriteDetail
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
@@ -7,15 +7,16 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.drizzle.R
 import com.example.drizzle.model.current.WeatherDTO
-import com.example.drizzle.repository.LocationSettings
 import com.example.drizzle.repository.SettingsPreferencesRepository
 import com.example.drizzle.repository.TemperatureSettings
 import com.example.drizzle.repository.WeatherRepository
+import com.example.drizzle.screens.home.CurrentWeatherUiState
+import com.example.drizzle.screens.home.DayWeatherRow
+import com.example.drizzle.screens.home.HourForecast
 import com.example.drizzle.ui.theme.coldGradient
 import com.example.drizzle.ui.theme.coolGradient
 import com.example.drizzle.ui.theme.hotGradient
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
-import com.example.drizzle.utils.location.LocationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -31,23 +32,23 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
-import okio.IOException
 import retrofit2.HttpException
+import java.io.IOException
 import java.net.SocketTimeoutException
 
-private const val TAG = "HomeViewModel"
+const val TAG = "FavoriteDetailsViewMode"
 
-class HomeViewModel(
-    private val repository: WeatherRepository,
-    private val settingsRepository: SettingsPreferencesRepository,
+class FavoriteDetailsViewModel(
     private val connectivityObserver: ConnectivityObserver,
-    private val locationHelper: LocationHelper
+    private val settingsRepository: SettingsPreferencesRepository,
+    private val repository: WeatherRepository
 ) : ViewModel() {
-
     // settings preferences attributes flows
     private lateinit var temperatureUnit: String
     private lateinit var windSpeedUnit: String
     private lateinit var locationSetting: String
+
+    var id: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     // stateFlows that update the UI
     private var _currentWeather: MutableStateFlow<CurrentWeatherUiState?> =
@@ -69,16 +70,23 @@ class HomeViewModel(
 
     init {
         loadUserSettings()
-        collectLocalDate()
+        viewModelScope.launch {
+            id.collectLatest {
+                collectLocalDate(id.value)
+            }
+        }
     }
 
     // in the init we only make the collection from database
-    fun collectLocalDate() {
+    fun collectLocalDate(cityId: Int?) {
         viewModelScope.launch(Dispatchers.IO) {
             delay(100)
-            repository.getLocalCurrentWeather().collect { list ->
+            if (cityId == null){
+                return@launch
+            }
 
-                // checking if any cached time equals current time
+            repository.getCityForecast(cityId).collect { list ->
+
                 if (list.isNotEmpty()) {
                     val currentTime = Clock.System.now().epochSeconds.toInt()
 
@@ -120,48 +128,24 @@ class HomeViewModel(
         }
     }
 
-    fun refreshData() {
+    fun refreshData(lat: Double, lon: Double){
         viewModelScope.launch(Dispatchers.IO) {
             // refresh cached data if there is internet connection
             val isConnected = connectivityObserver.isConnected.asFlow().first()
             if (isConnected) {
                 _isLoading.value = true
-                // 1 - here we check on the user selected source of location and get data upon it as Pair()
-                val coordinates = async {
-                    when (locationSetting) {
-                        LocationSettings.MAPS.name -> {
-                            settingsRepository.currentCoordinates.first()
-                        }
-
-                        else -> {
-                            locationHelper.getLocation().first()
-                        }
-                    }
-                }
 
                 try {
-                    // 2- second we get the data from server
-                    val current = async {
-                        getCurrentWeatherData(
-                            coordinates.await().first,
-                            coordinates.await().second
-                        )
-                    }
-                    val forecastList = async {
-                        getHourlyWeatherData(
-                            coordinates.await().first,
-                            coordinates.await().second
-                        )
-                    }
+                    val current = async { getCurrentWeatherData(lat, lon) }
+                    val forecastList = async { getHourlyWeatherData(lat, lon) }
 
-                    // 3- delete all cached data
-                    repository.deleteLocalCurrentWeather()
+                    repository.removeCityEntries(current.await().cityId)
+                    id.value = current.await().cityId
 
-                    // 4- caching the new data and that will cause the collection flow above to update the UI
                     runBlocking {
-                        repository.insertLocalCurrentEntry(current.await())
+                        repository.addCityEntry(current.await().toFavoriteWeatherDTO())
                         forecastList.await().forEach {
-                            repository.insertLocalCurrentEntry(it)
+                            repository.addCityEntry(it.toFavoriteWeatherDTO())
                         }
                     }
                     _error.value = ""   // here to make sure that there is noe error
@@ -175,6 +159,8 @@ class HomeViewModel(
                     Log.i(TAG, ex.toString())
                     _error.value = "refresh the screen again"
                 }
+            } else {
+                _error.value = "no internet connection"
             }
             _isLoading.value = false
         }
@@ -235,7 +221,7 @@ class HomeViewModel(
                 }
             }
         }
-        _weeklyWeather.emit (formattedList)
+        _weeklyWeather.emit(formattedList)
     }
 
 
@@ -299,37 +285,4 @@ class HomeViewModel(
     // function to parse the time from unix time to local Date and time
     private fun getLocalDateTime(unixTime: Long) = Instant.fromEpochSeconds(unixTime)
         .toLocalDateTime(TimeZone.UTC)
-
 }
-
-data class CurrentWeatherUiState(
-    val dayOfWeek: String = "",
-    val day: String = "",
-    val month: String = "",
-    val temperature: String = "20",
-    val humidity: String = "",
-    val windSpeed: String = "",
-    val weatherDesc: String = "",
-    val city: String = "",
-    val country: String = "",
-    val icon: Int = R.drawable.d02,
-    val tempUnit: Int = R.string.celsius_mark,
-    val background: List<Color>
-)
-
-data class HourForecast(
-    val image: Int = R.drawable.d02,
-    val temperature: String,
-    val hour: String,
-    val tempUnit: Int
-)
-
-data class DayWeatherRow(
-    val temperature: String,
-    val dayOfWeek: String,
-    val dayOfMonth: String,
-    val month: String,
-    val icon: Int,
-    val feelsLike: String,
-    val tempUnit: Int
-)

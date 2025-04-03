@@ -1,9 +1,11 @@
 package com.example.drizzle.data
 
+import com.example.drizzle.model.current.FavoriteWeatherDTO
 import com.example.drizzle.model.current.WeatherDTO
 import kotlinx.coroutines.flow.Flow
 
 class LocalDataSourceImpl(private val weatherDao: WeatherDao): LocalDataSource {
+    // here all functions that work on the cached current weather data
     override fun getAllCurrent(): Flow<List<WeatherDTO>> {
         return weatherDao.getCurrentForecast()
     }
@@ -14,5 +16,22 @@ class LocalDataSourceImpl(private val weatherDao: WeatherDao): LocalDataSource {
 
     override suspend fun insertHourForecast(hourForecast: WeatherDTO) {
         weatherDao.insertHourForecast(hourForecast)
+    }
+
+    // here all functions that work on the cached Favorite weather data
+    override suspend fun removeCityEntries(cityId: Int) {
+        weatherDao.removeCityEntries(cityId)
+    }
+
+    override suspend fun addCityEntry(entry: FavoriteWeatherDTO) {
+        weatherDao.addCityEntry(entry)
+    }
+
+    override fun getCityForecast(cityId: Int): Flow<List<FavoriteWeatherDTO>> {
+        return weatherDao.getCityForecast(cityId)
+    }
+
+    override fun getAllCities(): Flow<List<FavoriteWeatherDTO>> {
+        return weatherDao.getAllCities()
     }
 }

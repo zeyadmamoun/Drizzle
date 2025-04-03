@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.drizzle.R
 import com.example.drizzle.ui.theme.hourSection
@@ -45,6 +44,8 @@ import java.util.Locale
 fun MapScreen(
     paddingValues: PaddingValues = PaddingValues(),
     viewModel: MapViewModel = koinViewModel(),
+    isFavorite: Boolean = false,
+    navigateToFavoriteDetail:(lat: Double,lon: Double) -> Unit,
     navigateBack: () -> Unit
 ) {
 
@@ -81,7 +82,6 @@ fun MapScreen(
                 Marker(
                     state = it,
                     title = currentCity,
-                    snippet = "Marker in Singapore"
                 )
             }
         }
@@ -112,6 +112,8 @@ fun MapScreen(
                         currentContinent,
                         currentCoord,
                         viewModel,
+                        isFavorite = isFavorite,
+                        navigateToFavoriteDetail = navigateToFavoriteDetail,
                         navigateBack
                     )
                 }
@@ -126,6 +128,8 @@ fun LocationCard(
     currentContinent: String,
     currentCoordinate: LatLng?,
     viewModel: MapViewModel,
+    isFavorite: Boolean = false,
+    navigateToFavoriteDetail:(lat: Double,lon: Double) -> Unit,
     navigateBack: () -> Unit
 ) {
     Column(
@@ -152,9 +156,13 @@ fun LocationCard(
                     .padding(horizontal = 16.dp),
                 onClick = {
                     if (currentCoordinate != null){
-                        viewModel.changeDefaultCoordinates(currentCoordinate.latitude,currentCoordinate.longitude)
-                        viewModel.changeDefaultCity(currentCity)
-                        navigateBack()
+                        if (isFavorite){
+                            navigateToFavoriteDetail(currentCoordinate.latitude,currentCoordinate.longitude)
+                        } else {
+                            viewModel.changeDefaultCoordinates(currentCoordinate.latitude,currentCoordinate.longitude)
+                            viewModel.changeDefaultCity(currentCity)
+                            navigateBack()
+                        }
                     }
                 }
             ) {

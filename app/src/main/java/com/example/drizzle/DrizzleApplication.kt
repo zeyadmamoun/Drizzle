@@ -12,9 +12,12 @@ import com.example.drizzle.data.WeatherDatabase
 import com.example.drizzle.repository.SettingsPreferencesRepository
 import com.example.drizzle.repository.WeatherRepository
 import com.example.drizzle.repository.WeatherRepositoryImpl
+import com.example.drizzle.screens.favoriteDetail.FavoriteDetailsViewModel
+import com.example.drizzle.screens.favorites.FavoritesViewModel
 import com.example.drizzle.screens.home.HomeViewModel
 import com.example.drizzle.screens.map.MapViewModel
 import com.example.drizzle.screens.settings.SettingsViewModel
+import com.example.drizzle.screens.weatherAlert.WeatherAlertViewModel
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import com.example.drizzle.utils.location.LocationHelper
 import org.koin.android.ext.koin.androidContext
@@ -54,6 +57,9 @@ class DrizzleApplication : Application() {
             viewModel { HomeViewModel(get(), get(), get(),get()) }
             viewModel { SettingsViewModel(get()) }
             viewModel { MapViewModel(get()) }
+            viewModel { FavoritesViewModel(get(),get()) }
+            viewModel { FavoriteDetailsViewModel(get(),get(),get()) }
+            viewModel { WeatherAlertViewModel() }
         }
 
         startKoin {

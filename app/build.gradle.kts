@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.constraintlayout.compose.android)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     // Preferences DataStore

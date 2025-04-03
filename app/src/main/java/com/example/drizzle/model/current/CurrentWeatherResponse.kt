@@ -30,6 +30,7 @@ data class CurrentWeatherResponse(
         timezone = timezone,
         name = name,
         feelsLike = main.feels_like.toInt(),
-        icon = iconsMap[weather[0].icon]!!
+        icon = iconsMap[weather[0].icon]!!,
+        cityId = id
     )
 }

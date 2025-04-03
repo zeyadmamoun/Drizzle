@@ -17,5 +17,22 @@ data class FavoriteWeatherDTO(
     val country: String,
     val timezone: Int,
     val name: String,
-    val feelsLike: Int
-)
+    val feelsLike: Int,
+    val cityId: Int
+){
+    fun toWeatherObject(): WeatherDTO = WeatherDTO(
+        weatherLat = weatherLat,
+        weatherLon = weatherLon,
+        weatherDesc = weatherDesc,
+        mainTemp = mainTemp,
+        humidity = humidity,
+        windSpeed = windSpeed,
+        date = date,
+        country = country,
+        timezone = timezone,
+        name = name,
+        feelsLike = feelsLike,
+        icon = icon,
+        cityId = cityId
+    )
+}

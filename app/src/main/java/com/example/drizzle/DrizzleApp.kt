@@ -19,13 +19,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.drizzle.screens.favoriteDetail.FavoriteDetailsScreen
+import com.example.drizzle.screens.favorites.FavoriteScreen
 import com.example.drizzle.screens.home.HomeScreen
 import com.example.drizzle.screens.map.MapScreen
 import com.example.drizzle.screens.settings.SettingsScreen
+import com.example.drizzle.screens.weatherAlert.WeatherAlertScreen
 import com.example.drizzle.ui.theme.CustomSnackBar
+import com.example.drizzle.ui.theme.DrizzleFavoriteDetailsTopAppBar
+import com.example.drizzle.ui.theme.DrizzleFavoritesTopAppBar
 import com.example.drizzle.ui.theme.DrizzleHomeTopAppBar
 import com.example.drizzle.ui.theme.DrizzleMapTopAppBar
 import com.example.drizzle.ui.theme.DrizzleSettingsTopAppBar
+import com.example.drizzle.ui.theme.DrizzleWeatherAlertTopAppBar
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -49,11 +56,31 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver) {
         topBar = {
             when (currentDestination?.destination?.route) {
                 "com.example.drizzle.Home" -> DrizzleHomeTopAppBar(
-                    scrollBehavior
-                ) { navController.navigate(Settings) }
+                    scrollBehavior,
+                    onFavoriteIconClicked = { navController.navigate(Favorites) },
+                    onSettingsIconClicked = { navController.navigate(Settings) },
+                    onAlertIconClicked = { navController.navigate(WeatherAlert) }
+                )
 
                 "com.example.drizzle.Settings" -> DrizzleSettingsTopAppBar { navController.navigateUp() }
-                "com.example.drizzle.Map" -> DrizzleMapTopAppBar { navController.navigateUp() }
+                "com.example.drizzle.Map" -> {
+                    val title =
+                        if (navController.previousBackStackEntry?.destination?.route == "com.example.drizzle.Settings") {
+                            R.string.default_location
+                        } else {
+                            R.string.favorites
+                        }
+                    DrizzleMapTopAppBar(title) { navController.navigateUp() }
+                }
+
+                "com.example.drizzle.Favorites" -> DrizzleFavoritesTopAppBar { navController.navigateUp() }
+                "com.example.drizzle.WeatherAlert" -> DrizzleWeatherAlertTopAppBar { navController.navigateUp() }
+                else -> DrizzleFavoriteDetailsTopAppBar(scrollBehavior) {
+                    navController.popBackStack(
+                        Favorites,
+                        false
+                    )
+                }
             }
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -88,7 +115,42 @@ fun DrizzleApp(connectivityObserver: ConnectivityObserver) {
             composable<Map> {
                 MapScreen(
                     paddingValues = innerPadding,
+                    isFavorite = navController.previousBackStackEntry?.destination?.route == "com.example.drizzle.Favorites",
+                    navigateToFavoriteDetail = { lat, lon ->
+                        navController.navigate(
+                            FavoriteDetails(
+                                lat = lat,
+                                lon = lon,
+                                cityId = null
+                            )
+                        )
+                    },
                     navigateBack = { navController.navigateUp() }
+                )
+            }
+
+            composable<Favorites> {
+                FavoriteScreen(
+                    paddingValues = innerPadding,
+                    navigateToMap = { navController.navigate(Map) },
+                    navigateToFavoriteDetails = { lat, lon, cityId ->
+                        navController.navigate(FavoriteDetails(lat, lon, cityId))
+                    }
+                )
+            }
+
+            composable<FavoriteDetails> { backStackEntry ->
+                val favoriteDetails: FavoriteDetails = backStackEntry.toRoute()
+                FavoriteDetailsScreen(
+                    favoriteDetails.lat,
+                    favoriteDetails.lon,
+                    favoriteDetails.cityId
+                )
+            }
+
+            composable<WeatherAlert> {
+                WeatherAlertScreen(
+                    paddingValues = innerPadding
                 )
             }
         }
@@ -118,3 +180,5 @@ object WeatherAlert
 @Serializable
 object Map
 
+@Serializable
+data class FavoriteDetails(val lat: Double, val lon: Double, val cityId: Int?)

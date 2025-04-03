@@ -1,11 +1,12 @@
 package com.example.drizzle.repository
 
 import com.example.drizzle.data.LocalDataSource
+import com.example.drizzle.model.current.FavoriteWeatherDTO
 import com.example.drizzle.model.current.WeatherDTO
 import com.example.drizzle.network.RemoteDataSource
-import com.example.drizzle.screens.home.HourForecast
 import com.example.drizzle.ui.theme.iconsMap
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : WeatherRepository {
 
@@ -34,7 +35,8 @@ class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : Weat
                 date = item.dt,
                 timezone = result.city.timezone,
                 feelsLike = item.main.feels_like.toInt(),
-                icon = iconsMap[item.weather[0].icon]!!
+                icon = iconsMap[item.weather[0].icon]!!,
+                cityId = result.city.id
             )
         }.toList()
     }
@@ -49,5 +51,27 @@ class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : Weat
 
     override suspend fun insertLocalCurrentEntry(hourForecast: WeatherDTO) {
         localDataSource.insertHourForecast(hourForecast)
+    }
+
+    override suspend fun removeCityEntries(cityId: Int) {
+        localDataSource.removeCityEntries(cityId)
+    }
+
+    override suspend fun addCityEntry(entry: FavoriteWeatherDTO) {
+        localDataSource.addCityEntry(entry)
+    }
+
+    override suspend fun getCityForecast(cityId: Int): Flow<List<WeatherDTO>> {
+        val cityForecast = localDataSource.getCityForecast(cityId).map { item ->
+            item.map { subItem -> subItem.toWeatherObject() }.toList()
+        }
+        return cityForecast
+    }
+
+    override suspend fun getAllCities(): Flow<List<WeatherDTO>> {
+        val allCities = localDataSource.getAllCities().map { item ->
+            item.map { subItem -> subItem.toWeatherObject() }.toList()
+        }
+        return allCities
     }
 }

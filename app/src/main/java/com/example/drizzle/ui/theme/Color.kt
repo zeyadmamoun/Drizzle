@@ -18,4 +18,10 @@ val coldWeatherEnd = Color(0xff2c0a71)
 val hotWeatherStart = Color(0xffFF0000)
 val hotWeatherEnd = Color(0xffFFAA00)
 
+val grayStart = Color(0xff77a6b2)
+val grayEnd = Color(0xff43666f)
+
+val goldStart = Color(0xffe28911)
+val goldEnd = Color(0xffe0a812)
+
 val hourSection = Color(0xff1d2023)
