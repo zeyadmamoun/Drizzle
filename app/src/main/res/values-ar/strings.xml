@@ -23,4 +23,21 @@
     <string name="choose_location">اختر الموقع</string>
     <string name="default_location">الموقع الأساسي</string>
     <string name="current_Location">الموقع الحالي</string>
+    <string name="favorites">المفضلة</string>
+    <string name="no_fav_yet">لم يتم أضافة عناصر بعد</string>
+    <string name="add_favorite">أضافة</string>
+    <string name="remove_city">حذف المدينة</string>
+    <string name="alerts">التنبيهات</string>
+    <string name="add_alert">أضف تنبيه</string>
+    <string name="no_alart_yet">لم يتم أضافة تنبيهات بعد</string>
+    <string name="daily_time">الموعد اليومي</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="confirm_selection">تأكيد الإختيار</string>
+    <string name="dismiss_picker">إلغاء</string>
+    <string name="channel_name">Drizzle</string>
+    <string name="channel_description">Daily Forecast notification</string>
+    <string name="remove_alert">حذف التنبيه</string>
+    <string name="meter_mark">M/S</string>
+    <string name="mile_mark">Mil/H</string>
 </resources>

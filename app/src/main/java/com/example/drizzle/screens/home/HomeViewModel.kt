@@ -269,8 +269,8 @@ class HomeViewModel(
     // function to calculate the Wind Speed based on user selected unit like kelvin or celsius
     private fun getTheWindSpeedCalculation(windSpeed: Double): String {
         return when (windSpeedUnit) {
-            WindSpeedSettings.Meter.name -> windSpeed.toString()
-            else -> (windSpeed * 2.237).toString()
+            WindSpeedSettings.Meter.name -> (Math.round(windSpeed * 100) / 100.0).toString()
+            else -> (Math.round((windSpeed * 2.237) * 100) / 100.0).toString()
         }
     }
 
