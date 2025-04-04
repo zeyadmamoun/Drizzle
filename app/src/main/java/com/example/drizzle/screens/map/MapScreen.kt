@@ -196,9 +196,3 @@ fun getAddress(context: Context, location: LatLng): Pair<String, String>? {
         return null
     }
 }
-
-//@Preview
-//@Composable
-//private fun MapScreenPreview() {
-//    MapScreen()
-//}

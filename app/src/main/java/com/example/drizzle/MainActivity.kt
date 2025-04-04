@@ -15,18 +15,21 @@ import com.example.drizzle.repository.SettingsPreferencesRepository
 import com.example.drizzle.ui.theme.DrizzleTheme
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import com.example.drizzle.utils.locale.updateAppLocale
+import com.example.drizzle.utils.notification.NotificationHelper
 import org.koin.android.ext.android.inject
-import org.koin.compose.koinInject
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private val connectivityObserver: ConnectivityObserver by inject()
+    private val notificationHelper: NotificationHelper by inject()
     private val settingsPreferencesRepository: SettingsPreferencesRepository by inject()
 
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // here we create the notification channel
+        notificationHelper.createNotificationChannel()
         setContent {
 
             // here i collect the language stored in preferences and i change the app upon it

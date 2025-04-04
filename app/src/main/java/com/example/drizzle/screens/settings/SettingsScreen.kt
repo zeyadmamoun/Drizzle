@@ -2,7 +2,6 @@ package com.example.drizzle.screens.settings
 
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,7 +44,6 @@ import com.example.drizzle.repository.WindSpeedSettings
 import com.example.drizzle.ui.theme.hourSection
 import com.example.drizzle.utils.locale.updateAppLocale
 import org.koin.androidx.compose.koinViewModel
-import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -222,7 +220,7 @@ fun TemperatureSettingSection(temperature: String, action: (TemperatureSettings)
                                 }
 
                                 switchOptions[1] -> {
-                                    stringResource(R.string.celsius_mark)
+                                    stringResource(R.string.kelvin_mark)
                                 }
 
                                 else -> {

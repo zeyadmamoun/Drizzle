@@ -20,6 +20,7 @@ import com.example.drizzle.screens.settings.SettingsViewModel
 import com.example.drizzle.screens.weatherAlert.WeatherAlertViewModel
 import com.example.drizzle.utils.connectivity.ConnectivityObserver
 import com.example.drizzle.utils.location.LocationHelper
+import com.example.drizzle.utils.notification.NotificationHelper
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -38,8 +39,10 @@ class DrizzleApplication : Application() {
 
         val appModule = module {
 
+            // helpers
             single { ConnectivityObserver(get()) }
             single { LocationHelper(get()) }
+            single { NotificationHelper(get()) }
             single<WeatherDao> { WeatherDatabase.getDatabase(get()).weatherDao() }
 
             single<LocalDataSource> {
@@ -59,7 +62,7 @@ class DrizzleApplication : Application() {
             viewModel { MapViewModel(get()) }
             viewModel { FavoritesViewModel(get(),get()) }
             viewModel { FavoriteDetailsViewModel(get(),get(),get()) }
-            viewModel { WeatherAlertViewModel() }
+            viewModel { WeatherAlertViewModel(get(),get(),get(),get()) }
         }
 
         startKoin {

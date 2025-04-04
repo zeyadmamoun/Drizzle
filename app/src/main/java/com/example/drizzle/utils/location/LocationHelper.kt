@@ -29,7 +29,7 @@ class LocationHelper(private val context: Context) {
                     trySend(
                         Pair(
                             location.lastLocation!!.latitude,
-                            location.lastLocation!!.latitude
+                            location.lastLocation!!.longitude
                         )
                     )
                 }

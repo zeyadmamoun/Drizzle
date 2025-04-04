@@ -76,9 +76,11 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     // Android Maps Compose composables for the Maps SDK for Android
     implementation(libs.maps.compose)
+    // Work Manager
+    implementation(libs.androidx.work.runtime.ktx)
 
-
-
+    
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

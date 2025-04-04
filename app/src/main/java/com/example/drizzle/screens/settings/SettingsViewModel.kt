@@ -1,9 +1,5 @@
 package com.example.drizzle.screens.settings
 
-import android.content.Context
-import android.content.res.Configuration
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drizzle.repository.LanguageSettings
@@ -16,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 class SettingsViewModel(
     private val settingsPreferencesRepository: SettingsPreferencesRepository
@@ -97,6 +92,4 @@ class SettingsViewModel(
             settingsPreferencesRepository.saveWindSpeedPreference(windSpeedSettings)
         }
     }
-
-
 }

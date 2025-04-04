@@ -1,5 +1,6 @@
 package com.example.drizzle.data
 
+import com.example.drizzle.model.alert.Alert
 import com.example.drizzle.model.current.FavoriteWeatherDTO
 import com.example.drizzle.model.current.WeatherDTO
 import kotlinx.coroutines.flow.Flow
@@ -19,4 +20,10 @@ interface LocalDataSource {
     fun getCityForecast(cityId: Int): Flow<List<FavoriteWeatherDTO>>
 
     fun getAllCities(): Flow<List<FavoriteWeatherDTO>>
+
+    suspend fun deleteAlert(alert: Alert)
+
+    suspend fun addAlert(alert: Alert)
+
+    fun getAlerts(): Flow<List<Alert>>
 }

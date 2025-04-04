@@ -7,13 +7,12 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import androidx.core.content.getSystemService
 import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.flow.MutableStateFlow
 
 class ConnectivityObserver(context: Context) {
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
     val isConnected: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    val callback = object : NetworkCallback() {
+    private val callback = object : NetworkCallback() {
 
         override fun onCapabilitiesChanged(
             network: Network,

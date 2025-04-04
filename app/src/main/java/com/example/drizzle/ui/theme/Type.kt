@@ -13,6 +13,7 @@ val PlusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
     Font(R.font.plus_jakarta_sans_extra_bold, FontWeight.ExtraBold),
     Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
+    Font(R.font.plus_jakarta_sans_light, FontWeight.Light),
 )
 
 // Set of Material typography styles to start with
@@ -50,6 +51,13 @@ val Typography = Typography(
         fontFamily = PlusJakartaSans,
         fontWeight = FontWeight.SemiBold,
         fontSize = 22.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = PlusJakartaSans,
+        fontWeight = FontWeight.Light,
+        fontSize = 14.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     ),

@@ -1,11 +1,8 @@
 package com.example.drizzle.repository
 
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import com.example.drizzle.model.alert.Alert
 import com.example.drizzle.model.current.FavoriteWeatherDTO
 import com.example.drizzle.model.current.WeatherDTO
-import com.example.drizzle.screens.home.HourForecast
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherRepository {
@@ -36,4 +33,10 @@ interface WeatherRepository {
     suspend fun getCityForecast(cityId: Int): Flow<List<WeatherDTO>>
 
     suspend fun getAllCities(): Flow<List<WeatherDTO>>
+
+    suspend fun addAlert(alert: Alert)
+
+    suspend fun deleteAlert(alert: Alert)
+
+    fun getAlerts(): Flow<List<Alert>>
 }

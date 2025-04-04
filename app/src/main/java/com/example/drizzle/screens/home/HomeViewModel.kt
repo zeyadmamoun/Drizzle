@@ -11,6 +11,7 @@ import com.example.drizzle.repository.LocationSettings
 import com.example.drizzle.repository.SettingsPreferencesRepository
 import com.example.drizzle.repository.TemperatureSettings
 import com.example.drizzle.repository.WeatherRepository
+import com.example.drizzle.repository.WindSpeedSettings
 import com.example.drizzle.ui.theme.coldGradient
 import com.example.drizzle.ui.theme.coolGradient
 import com.example.drizzle.ui.theme.hotGradient
@@ -257,6 +258,22 @@ class HomeViewModel(
         }
     }
 
+    // function to update the wind speed unit on the UI
+    private fun getTheWindSpeedUnit(): Int {
+        return when (windSpeedUnit) {
+            WindSpeedSettings.Meter.name -> R.string.meter_mark
+            else -> R.string.mile_mark
+        }
+    }
+
+    // function to calculate the Wind Speed based on user selected unit like kelvin or celsius
+    private fun getTheWindSpeedCalculation(windSpeed: Double): String {
+        return when (windSpeedUnit) {
+            WindSpeedSettings.Meter.name -> windSpeed.toString()
+            else -> (windSpeed * 2.237).toString()
+        }
+    }
+
     // function to update the gradient color based on the temperature
     private fun changeBackgroundColor(temperature: Int): List<Color> {
         val celsiusTemp = when (temperatureUnit) {
@@ -283,7 +300,7 @@ class HomeViewModel(
                 month = date.month.toString(),
                 temperature = getTheTempCalculation(temperature = weatherDTO.mainTemp),
                 humidity = weatherDTO.humidity.toString(),
-                windSpeed = weatherDTO.windSpeed.toString(),
+                windSpeed = getTheWindSpeedCalculation(weatherDTO.windSpeed),
                 weatherDesc = weatherDTO.weatherDesc,
                 city = weatherDTO.name,
                 country = weatherDTO.country,
@@ -291,7 +308,8 @@ class HomeViewModel(
                 tempUnit = getTheTempUnit(),
                 background = changeBackgroundColor(
                     getTheTempCalculation(temperature = weatherDTO.mainTemp).toInt()
-                )
+                ),
+                windSpeedUnit = getTheWindSpeedUnit()
             )
         )
     }
@@ -314,7 +332,8 @@ data class CurrentWeatherUiState(
     val country: String = "",
     val icon: Int = R.drawable.d02,
     val tempUnit: Int = R.string.celsius_mark,
-    val background: List<Color>
+    val background: List<Color>,
+    val windSpeedUnit: Int = R.string.meter_mark
 )
 
 data class HourForecast(

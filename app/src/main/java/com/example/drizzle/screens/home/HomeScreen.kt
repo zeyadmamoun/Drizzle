@@ -201,6 +201,13 @@ fun TemperatureSectionContent(state: CurrentWeatherUiState?) {
                 color = Color.White
             ),
         )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            stringResource(state.windSpeedUnit),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = Color.White
+            ),
+        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))

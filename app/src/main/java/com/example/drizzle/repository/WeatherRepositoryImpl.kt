@@ -1,6 +1,7 @@
 package com.example.drizzle.repository
 
 import com.example.drizzle.data.LocalDataSource
+import com.example.drizzle.model.alert.Alert
 import com.example.drizzle.model.current.FavoriteWeatherDTO
 import com.example.drizzle.model.current.WeatherDTO
 import com.example.drizzle.network.RemoteDataSource
@@ -73,5 +74,17 @@ class WeatherRepositoryImpl(private val localDataSource: LocalDataSource) : Weat
             item.map { subItem -> subItem.toWeatherObject() }.toList()
         }
         return allCities
+    }
+
+    override suspend fun addAlert(alert: Alert) {
+        localDataSource.addAlert(alert)
+    }
+
+    override suspend fun deleteAlert(alert: Alert) {
+        localDataSource.deleteAlert(alert)
+    }
+
+    override fun getAlerts(): Flow<List<Alert>> {
+        return localDataSource.getAlerts()
     }
 }
