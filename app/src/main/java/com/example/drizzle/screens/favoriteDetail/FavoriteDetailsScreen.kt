@@ -44,10 +44,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.drizzle.R
 import com.example.drizzle.screens.home.CurrentWeatherUiState
 import com.example.drizzle.screens.home.DayWeatherRow
 import com.example.drizzle.screens.home.HourForecast
+import com.example.drizzle.ui.theme.coldGradient
 import com.example.drizzle.ui.theme.coolGradient
 import com.example.drizzle.ui.theme.hourSection
 import kotlinx.coroutines.launch
@@ -130,6 +136,22 @@ fun TemperatureSection(
                 )
             )
     ) {
+
+        // this if condition is responsible for background animation
+        if (state != null && state.background == coldGradient){
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.snowing_animation))
+            val progress by animateLottieCompositionAsState(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+            )
+
+            LottieAnimation(
+                composition = composition,
+                modifier = Modifier
+                    .fillMaxSize(),
+                progress = { progress },
+            )
+        }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
